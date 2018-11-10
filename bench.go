@@ -25,7 +25,7 @@ func readResp(rd *bufio.Reader, n int, opts *Options) error {
 			return errors.New("invalid server response")
 		case '+', ':':
 		case '-':
-			opts.Stderr.Write(line[1 : len(line)-2])
+			opts.Stderr.Write(line)
 		case '$':
 			n, err := strconv.ParseInt(string(line[1:len(line)-2]), 10, 64)
 			if err != nil {
