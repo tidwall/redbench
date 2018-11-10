@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func readResp(rd *bufio.Reader, n int) error {
+func readResp(rd *bufio.Reader, n int, opts *Options) error {
 	for i := 0; i < n; i++ {
 		line, err := rd.ReadBytes('\n')
 		if err != nil {
@@ -25,6 +25,7 @@ func readResp(rd *bufio.Reader, n int) error {
 			return errors.New("invalid server response")
 		case '+', ':':
 		case '-':
+			opts.Stderr.Write(line[1 : len(line)-2])
 		case '$':
 			n, err := strconv.ParseInt(string(line[1:len(line)-2]), 10, 64)
 			if err != nil {
@@ -40,7 +41,7 @@ func readResp(rd *bufio.Reader, n int) error {
 			if err != nil {
 				return err
 			}
-			readResp(rd, int(n))
+			readResp(rd, int(n), opts)
 		}
 	}
 	return nil
@@ -155,7 +156,7 @@ func Bench(
 					if err != nil {
 						return err
 					}
-					if err := readResp(rd, n); err != nil {
+					if err := readResp(rd, n, opts); err != nil {
 						return err
 					}
 					stop := time.Since(start)
